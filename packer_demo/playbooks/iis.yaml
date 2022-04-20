@@ -1,0 +1,50 @@
+---
+- name: 'Setup image with iis'
+  hosts: all
+  tasks:
+  - name: ensure iis is installed
+    win_feature:
+      name: 'Web-Server'
+      include_sub_features: yes
+      include_management_tools: yes
+      restart: yes
+
+  - name: configure app pool
+    win_iis_webapppool:
+      name: 'DefaultAppPool'
+      state: started
+
+  - name: ensure path for site exists
+    win_file:
+      path: 'C:\inetpub\wwwroot'
+      state: directory
+
+  - name: allow iis group access to site path
+    win_acl:
+      path: 'C:\inetpub\wwwroot'
+      user: 'IIS_IUSRS'
+      rights: FullControl
+      type: allow
+      state: present
+      inherit: 'ContainerInherit, ObjectInherit'
+      propagation: 'None'
+
+  - name: upload custom web.config from template
+    win_template:
+      src: ''
+      dest: 'C:\inetpub\wwwroot'
+      force: true
+
+
+  - name: configure site
+    win_iis_website:
+      name: 'Default Web Site'
+      physical_path: 'C:\inetpub\wwwroot'
+      site_id: ""
+      ip: "*"
+      port: '80'
+      ssl: false
+      hostname: ''
+      application_pool: 'DefaultAppPool'
+      parameters: ""
+      state: 'started'

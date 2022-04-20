@@ -1,0 +1,49 @@
+{
+    "builders": [{
+      "type": "azure-arm",
+      "use_azure_cli_auth": true,
+  
+      "client_id": "<client_id>",
+      "client_secret": "<client_secret>",
+      "tenant_id": "<tenant_id>",
+      "subscription_id": "<subscription_id>",
+  
+      "managed_image_resource_group_name": "demo",
+      "managed_image_name": "mujImage",
+  
+      "os_type": "Windows",
+      "image_publisher": "MicrosoftWindowsServer",
+      "image_offer": "WindowsServer",
+      "image_sku": "2016-Datacenter",
+  
+      "communicator": "winrm",
+      "winrm_use_ssl": true,
+      "winrm_insecure": true,
+      "winrm_timeout": "5m",
+      "winrm_username": "packer",
+  
+      "azure_tags": {
+          "dept": "Engineering",
+          "task": "Image deployment"
+      },
+  
+      "build_resource_group_name": "demo",
+      "vm_size": "Standard_D2_v2"
+    }],
+    "provisioners": [
+        {
+          "type": "powershell",
+          "script": "./scripts/ConfigureRemotingForAnsible.ps1"
+        }, 
+          {
+            "type": "ansible",
+            "playbook_file": "./playbooks/nginx.yaml",  
+            "user": "packer",
+            "use_proxy": false,
+            "extra_arguments": ["-e", "ansible_winrm_server_cert_validation=ignore"]
+        },
+        {
+          "type": "powershell",
+          "script" : "./scripts/sysprep.ps1"
+        }]
+  }

@@ -1,0 +1,7 @@
+---
+all:
+  hosts:
+    nginx_server:
+      ansible_host: "20.73.43.167"
+      ansible_user: azureuser
+      
